@@ -13,6 +13,9 @@ A high-precision, web-based metronome application built with Vanilla JavaScript,
 - **Accent Control**: Toggle a high-pitched accent on the first beat of the cycle.
 - **Bilingual Interface**: Fully localized UI in both English and Traditional Chinese.
 - **Premium Design**: Sleek dark mode aesthetics with neon accents, optimized for both desktop and mobile.
+- **Smart Persistence**:
+    - **Auto-Save**: Automatically remembers your last used settings/rhythm when you return.
+    - **Presets**: Save multiple named configurations (e.g., "Jazz Swing", "Speed Drill") and switch between them instantly.
 - **Zero Dependencies**: Pure static files. No build process or servers required.
 
 ## Usage
@@ -23,7 +26,10 @@ A high-precision, web-based metronome application built with Vanilla JavaScript,
     - **Pattern Length**: Set how many total steps are in your measure/loop.
     - **Steps per Beat**: Set how many steps equal one beat of your specified BPM.
 4. **Edit Pattern**: Click on the grid blocks to mute/unmute specific steps.
-5. **Play**: Click the large Play button to start.
+5. **Save Presets** (Optional):
+    - Type a name in the "Presets" section and click **Save**.
+    - Click any saved preset to load it.
+6. **Play**: Click the large Play button to start.
 
 ---
 
@@ -42,6 +48,9 @@ A high-precision, web-based metronome application built with Vanilla JavaScript,
 - **首拍強調**：可切換是否在循環的第一拍發出高音提示。
 - **雙語介面**：完整支援繁體中文與英文介面。
 - **精美設計**：極簡深色模式搭配霓虹配色，針對桌面與行動裝置優化。
+- **智慧儲存**：
+    - **自動儲存**：自動記憶您上次使用的所有設定，重新整理頁面後即可繼續使用。
+    - **多組預設 (Presets)**：可將特定設定儲存為不同名稱 (例如 "搖滾節奏", "五連音練習") 並隨時切換。
 - **零依賴**：純靜態檔案，無需任何建置過程或伺服器。
 
 ## 使用說明
@@ -52,4 +61,7 @@ A high-precision, web-based metronome application built with Vanilla JavaScript,
     - **樣式長度**：設定一個小節/循環中共有多少個步數。
     - **每拍步數**：設定多少個步數等於 BPM 的一拍。
 4. **編輯樣式**：點擊網格方塊來將特定的步數靜音或開啟。
-5. **播放**：點擊大播放按鈕開始。
+5. **預設組 (Presets)**：
+    - 在下方輸入名稱並點擊 **儲存 (Save)** 即可將當前設定存起來。
+    - 點擊列表中的名稱即可立即讀取。
+6. **播放**：點擊大播放按鈕開始。
