@@ -177,6 +177,12 @@ const spbDecrease = document.getElementById('spb-decrease');
 const patternGrid = document.getElementById('pattern-grid');
 const accentToggle = document.getElementById('accent-toggle');
 
+// Presets
+const presetNameInput = document.getElementById('preset-name-input');
+const savePresetBtn = document.getElementById('save-preset-btn');
+const presetList = document.getElementById('preset-list');
+const PRESETS_KEY = 'metronomePresetsMap';
+
 // State
 let currentPatternLength = 4;
 let currentStepsPerBeat = 4;
@@ -186,6 +192,7 @@ metronome.setPatternLength(currentPatternLength);
 metronome.setStepsPerBeat(currentStepsPerBeat);
 
 loadSettings();
+renderPresetList();
 
 // Sync UI toggle with default state
 accentToggle.checked = metronome.accentFirstBeat;
@@ -242,6 +249,109 @@ function loadSettings() {
   } catch (e) {
     console.error('Error loading settings:', e);
   }
+}
+
+// --- Presets Logic ---
+
+function getPresets() {
+  const saved = localStorage.getItem(PRESETS_KEY);
+  if (!saved) return {};
+  try {
+    return JSON.parse(saved);
+  } catch {
+    return {};
+  }
+}
+
+function savePreset() {
+  const name = presetNameInput.value.trim();
+  if (!name) return;
+
+  const presets = getPresets();
+  const settings = {
+    bpm: metronome.bpm,
+    patternLength: currentPatternLength,
+    stepsPerBeat: currentStepsPerBeat,
+    pattern: metronome.pattern,
+    accent: metronome.accentFirstBeat
+  };
+
+  presets[name] = settings;
+  localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+
+  presetNameInput.value = ''; // Clear input
+  renderPresetList();
+}
+
+function loadPreset(name) {
+  const presets = getPresets();
+  const settings = presets[name];
+  if (!settings) return;
+
+  // Utilize existing logic from loadSettings, but apply immediately
+  if (settings.bpm) updateBPM(settings.bpm);
+
+  if (settings.patternLength) {
+    updatePatternLength(0, settings.patternLength);
+  }
+
+  if (settings.stepsPerBeat) {
+    updateStepsPerBeat(0, settings.stepsPerBeat);
+  }
+
+  if (settings.pattern && Array.isArray(settings.pattern)) {
+    // Ensure length matches current (which we just set)
+    if (settings.pattern.length === currentPatternLength) {
+      metronome.pattern = settings.pattern;
+    }
+  }
+
+  if (typeof settings.accent === 'boolean') {
+    metronome.accentFirstBeat = settings.accent;
+    accentToggle.checked = settings.accent;
+  }
+
+  renderGrid();
+  saveSettings(); // Save as "last used" immediately
+}
+
+function deletePreset(name) {
+  const presets = getPresets();
+  delete presets[name];
+  localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+  renderPresetList();
+}
+
+function renderPresetList() {
+  const presets = getPresets();
+  const names = Object.keys(presets).sort();
+
+  presetList.innerHTML = '';
+
+  names.forEach(name => {
+    const li = document.createElement('li');
+    li.className = 'preset-item';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'preset-name';
+    nameSpan.textContent = name;
+    nameSpan.onclick = () => loadPreset(name);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-delete';
+    deleteBtn.innerHTML = '×'; // or icon
+    deleteBtn.title = 'Delete Preset';
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (confirm(`Delete preset "${name}"?`)) {
+        deletePreset(name);
+      }
+    };
+
+    li.appendChild(nameSpan);
+    li.appendChild(deleteBtn);
+    presetList.appendChild(li);
+  });
 }
 
 function updatePlayButton() {
@@ -396,4 +506,9 @@ spbInput.addEventListener('change', (e) => updateStepsPerBeat(0, e.target.value)
 accentToggle.addEventListener('change', (e) => {
   metronome.accentFirstBeat = e.target.checked;
   saveSettings();
+});
+
+savePresetBtn.addEventListener('click', savePreset);
+presetNameInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') savePreset();
 });
