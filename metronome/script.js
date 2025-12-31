@@ -184,9 +184,65 @@ let currentStepsPerBeat = 4;
 // Init
 metronome.setPatternLength(currentPatternLength);
 metronome.setStepsPerBeat(currentStepsPerBeat);
+
+loadSettings();
+
 // Sync UI toggle with default state
 accentToggle.checked = metronome.accentFirstBeat;
 renderGrid();
+
+function saveSettings() {
+  const settings = {
+    bpm: metronome.bpm,
+    patternLength: currentPatternLength,
+    stepsPerBeat: currentStepsPerBeat,
+    pattern: metronome.pattern,
+    accent: metronome.accentFirstBeat
+  };
+  localStorage.setItem('metronomeSettings', JSON.stringify(settings));
+}
+
+function loadSettings() {
+  const saved = localStorage.getItem('metronomeSettings');
+  if (!saved) return;
+
+  try {
+    const settings = JSON.parse(saved);
+
+    // Restore BPM
+    if (settings.bpm) {
+      updateBPM(settings.bpm);
+    }
+
+    // Restore Global Counts
+    if (settings.patternLength) {
+      currentPatternLength = settings.patternLength;
+      patLengthInput.value = currentPatternLength;
+      metronome.setPatternLength(currentPatternLength);
+    }
+
+    if (settings.stepsPerBeat) {
+      currentStepsPerBeat = settings.stepsPerBeat;
+      spbInput.value = currentStepsPerBeat;
+      metronome.setStepsPerBeat(currentStepsPerBeat);
+    }
+
+    // Restore Pattern Layout
+    // We override whatever default resizing logic did if we have a saved pattern of correct length
+    if (settings.pattern && Array.isArray(settings.pattern)) {
+      if (settings.pattern.length === currentPatternLength) {
+        metronome.pattern = settings.pattern;
+      }
+    }
+
+    // Restore Accent
+    if (typeof settings.accent === 'boolean') {
+      metronome.accentFirstBeat = settings.accent;
+    }
+  } catch (e) {
+    console.error('Error loading settings:', e);
+  }
+}
 
 function updatePlayButton() {
   if (metronome.isPlaying) {
@@ -216,6 +272,7 @@ function updateBPM(val) {
   // Update Sub BPM Display
   // SubBPM = MainBPM * StepsPerBeat
   subBpmInput.value = Math.round(bpm * currentStepsPerBeat);
+  saveSettings();
 }
 
 function updateSubBPM(val) {
@@ -249,6 +306,7 @@ function updatePatternLength(delta, exactVal = null) {
   metronome.setPatternLength(currentPatternLength);
 
   renderGrid();
+  saveSettings();
 }
 
 function updateStepsPerBeat(delta, exactVal = null) {
@@ -269,6 +327,7 @@ function updateStepsPerBeat(delta, exactVal = null) {
 
   // Refresh Sub BPM Display since ratio changed
   subBpmInput.value = Math.round(metronome.bpm * currentStepsPerBeat);
+  saveSettings();
 }
 
 function renderGrid() {
@@ -291,6 +350,7 @@ function renderGrid() {
     cell.addEventListener('click', () => {
       metronome.togglePatternIndex(index);
       renderGrid(); // Re-render to show active state
+      saveSettings();
     });
     patternGrid.appendChild(cell);
   });
@@ -335,4 +395,5 @@ spbInput.addEventListener('change', (e) => updateStepsPerBeat(0, e.target.value)
 
 accentToggle.addEventListener('change', (e) => {
   metronome.accentFirstBeat = e.target.checked;
+  saveSettings();
 });
